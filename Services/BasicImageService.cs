@@ -27,6 +27,7 @@ namespace CinematicSuite.Services
 
         public async Task<byte[]> EncodeImageAsync(IFormFile poster)
         {
+            using var ms = new MemoryStream();
             if (poster == null) return null;
             await poster.CopyToAsync(ms);
             return ms.ToArray();

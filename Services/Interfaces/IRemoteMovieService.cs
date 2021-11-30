@@ -9,8 +9,8 @@ namespace CinematicSuite.Services.Interfaces
 {
     public interface IRemoteMovieService
     {
-        Task<MovieDetail> MovieDetailAsnyc(int id);
+        Task<MovieDetail> MovieDetailAsync(int id);
         Task<MovieSearch> SearchMoviesAsync(MovieCategory category, int count);
-        Task<ActorDetail> ActorDetailAync(int id);
+        Task<ActorDetail> ActorDetailAsync(int id);
     }
 }

@@ -24,7 +24,7 @@ namespace CinematicSuite.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<ActorDetail> ActorDetailAync(int id)
+        public async Task<ActorDetail> ActorDetailAsync(int id)
         {
 
             //Step 1: Setup a default return object
@@ -56,7 +56,7 @@ namespace CinematicSuite.Services
             return actorDetail;
         }
 
-        public async Task<MovieDetail> MovieDetailAsnyc(int id) 
+        public async Task<MovieDetail> MovieDetailAsync(int id) 
         {
 
             //Step 1: Setup default return object
