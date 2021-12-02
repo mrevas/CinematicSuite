@@ -22,7 +22,7 @@ namespace CinematicSuite.Services
         {
             if (poster == null) return null;
             var posterImage = Convert.ToBase64String(poster);
-            return $"data:{contentType};base74,{posterImage}";
+            return $"data:{contentType};base64,{posterImage}";
         }
 
         public async Task<byte[]> EncodeImageAsync(IFormFile poster)

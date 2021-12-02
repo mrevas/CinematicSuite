@@ -5,8 +5,7 @@ using CinematicSuite.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,16 +13,16 @@ namespace CinematicSuite.Controllers
 {
     public class MoviesController : Controller
     {
-        private readonly AppSettings _appSettings;
         private readonly ApplicationDbContext _context;
         private readonly IImageService _imageService;
         private readonly IRemoteMovieService _tmdbMovieService;
         private readonly IDataMappingService _tmdbMappingService;
+        private readonly AppSettings _appSettings;
 
 
-        public MoviesController(AppSettings appSettings, IImageService imageService, ApplicationDbContext context, IDataMappingService tmdbMapingService, IRemoteMovieService tmdbMovieService)
+        public MoviesController(IOptions<AppSettings> appSettings, IImageService imageService, ApplicationDbContext context, IDataMappingService tmdbMapingService, IRemoteMovieService tmdbMovieService)
         {
-            _appSettings = appSettings;
+            _appSettings = appSettings.Value;
             _imageService = imageService;
             _context = context;
             _tmdbMappingService = tmdbMapingService;
@@ -64,7 +63,7 @@ namespace CinematicSuite.Controllers
             await _context.SaveChangesAsync();
 
             //Step 4: Assign it to the default All Collection
-            await AddToMovieCollection(movie.Id, _appSettings.MovieProSettings.DefaultCollection.Name);
+            await AddToMovieCollection(movie.Id, _appSettings.CinematicSuiteSettings.DefaultCollection.Name);
 
             return RedirectToAction("Import");
 
@@ -73,6 +72,34 @@ namespace CinematicSuite.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+
+        public async Task<IActionResult> Details(int? id, bool local = false)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var movie = new Movie();
+            if (local)
+            {
+                movie = await _context.Movie.Include(m => m.Cast)
+                                            .Include(m => m.Crew)
+                                            .FirstOrDefaultAsync(m => m.Id == id);
+            }
+            else
+            {
+                var movieDetail = await _tmdbMovieService.MovieDetailAsync((int)id);
+                movie = await _tmdbMappingService.MapMovieDetailAsync(movieDetail);
+            }
+            
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            ViewData["Local"] = local;
+            return View(movie);
         }
 
         // GET: Temp/Create

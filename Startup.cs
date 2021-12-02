@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MovieProDemo.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,8 @@ namespace CinematicSuite
 
             services.AddControllersWithViews();
 
+            services.AddRazorPages();
+
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             services.AddTransient<SeedService>();
@@ -47,6 +50,8 @@ namespace CinematicSuite
             services.AddHttpClient();
 
             services.AddScoped<IRemoteMovieService, TMDBMovieService>();
+
+            services.AddScoped<IDataMappingService, TMDBMappingService>();
 
             services.AddSingleton<IImageService, BasicImageService>();
         }
