@@ -113,6 +113,7 @@ namespace CinematicSuite.Services
                 movieSearch = (MovieSearch)dcjs.ReadObject(responseStream);
                 movieSearch.results = movieSearch.results.Take(count).ToArray();
                 movieSearch.results.ToList().ForEach(r => r.poster_path = $"{_appSettings.TMDBSettings.BaseImagePath}/{_appSettings.CinematicSuiteSettings.DefaultPosterSize}/{r.poster_path}");
+                movieSearch.results.ToList().ForEach(r => r.backdrop_path = $"{_appSettings.TMDBSettings.BaseImagePath}/{_appSettings.CinematicSuiteSettings.DefaultBackdropSize}/{r.backdrop_path}");
             }
 
             return movieSearch;

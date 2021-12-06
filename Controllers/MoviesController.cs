@@ -98,6 +98,7 @@ namespace CinematicSuite.Controllers
             {
                 return NotFound();
             }
+            ViewData["MovieUrl"] = $"https://www.2embed.ru/embed/tmdb/movie?id={movie.MovieId}";
             ViewData["Local"] = local;
             return View(movie);
         }

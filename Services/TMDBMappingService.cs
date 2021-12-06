@@ -117,8 +117,6 @@ namespace MovieProDemo.Services
             return actor;
         }
 
-
-
         private async Task<byte[]> EncodeBackdropImageAsync(string path)
         {
             var backdropPath = $"{_appSettings.TMDBSettings.BaseImagePath}/{_appSettings.CinematicSuiteSettings.DefaultBackdropSize}/{path}";

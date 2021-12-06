@@ -1,172 +1,632 @@
-﻿@using CinematicSuite.ViewModels
+﻿@using CinematicSuite.Services.Interfaces
+@using CinematicSuite.ViewModels
+@using CinematicSuite.Data
+@using CinematicSuite.Models.Database
+@using Microsoft.EntityFrameworkCore
 @model LandingPageVM
+@inject IDataMappingService _tmdbMappingService
+@inject IRemoteMovieService _remoteMovieService
+@inject ApplicationDbContext _context 
 @{
     ViewData["Title"] = "Cinematic Suite";
 }
 
-<style>
-    .clamp-overview {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+
+
+<!-- Slider Start -->
+<section id="home" class="iq-main-slider p-0 iq-rtl-direction">
+    <div id="home-slider" class="slider m-0 p-0">
+
+        @foreach (var movie in Model.Popular.results.Take(4).ToArray())
+        {
+            var score = Math.Truncate(movie.vote_average / 2);
+            var i = 1;
+            var starClass = "fa-star";
+            var details = await _remoteMovieService.MovieDetailAsync(movie.id);
+            var mappedMovieDetails = await _tmdbMappingService.MapMovieDetailAsync(details);
+            var cast = details.credits.cast;
+            var genres = details.genres;
+            var runtime = details.runtime;
+
+            <div class="slide slick-bg s-bg-1" style="background-image: url(@movie.backdrop_path);">
+                <div class="container-fluid position-relative h-100">
+                    <div class="slider-inner h-100">
+                        <div class="row align-items-center  iq-ltr-direction h-100 ">
+                            <div class="col-xl-6 col-lg-12 col-md-12">
+                                <a href="javascript:void(0);">
+                                    <div class="channel-logo" data-animation-in="fadeInLeft" data-delay-in="0.5">
+                                        <img src="images/logo.png" class="c-logo" alt="streamit">
+                                    </div>
+                                </a>
+                                <h1 class="slider-text big-title title text-uppercase" data-animation-in="fadeInLeft"
+                                    data-delay-in="0.6">
+                                    @movie.title
+                                </h1>
+
+                                <div class="d-flex flex-wrap align-items-center fadeInLeft animated" data-animation-in="fadeInLeft" style="opacity: 1;">
+                                    <div class="slider-ratting d-flex align-items-center mr-4 mt-2 mt-md-3">
+                                        <ul class="ratting-start p-0 m-0 list-inline text-primary d-flex align-items-center justify-content-left">
+                                            <li>
+                                                @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                <i class="fa @starClass" aria-hidden="true"></i>
+                                            </li>
+                                            <li>
+                                                @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                <i class="fa @starClass" aria-hidden="true"></i>
+                                            </li>
+                                            <li>
+                                                @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                <i class="fa @starClass" aria-hidden="true"></i>
+                                            </li>
+                                            <li>
+                                                @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                <i class="fa @starClass" aria-hidden="true"></i>
+                                            </li>
+                                            <li>
+                                                @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                <i class="fa @starClass" aria-hidden="true"></i>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="d-flex align-items-center mt-2 mt-md-3">
+                                        <span class="badge badge-secondary p-2">@(details.runtime)min</span>
+                                    </div>
+                                </div>
+
+                                <p data-animation-in="fadeInUp" data-delay-in="1.2">@movie.overview</p>
+                                <div class="trending-list" data-wp_object-in="fadeInUp" data-delay-in="1.2">
+                                    <div class="text-primary title starring">
+                                        Starring:
+                                        <span class="text-body">
+                                            @** add commas in between actor names *@
+                                            @{int num = 1;}
+                                            @foreach (var actor in cast.Take(2))
+                                            {
+                                                var comma = num < 2 ? ", " : "";
+                                                <span>@actor.name@comma</span>;
+                                                num++;
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="text-primary title genres">
+                                        Genres:
+                                        <span class="text-body">
+                                            @{num = 1;}
+                                            @foreach (var g in genres)
+                                            {
+                                                var comma = num < genres.Length ? ", " : "";
+                                                <span>@g.name@comma</span>;
+                                                num++;
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center r-mb-23" data-animation-in="fadeInUp" data-delay-in="1.2">
+                                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.id" class="btn btn-hover iq-button">
+                                        <i class="fa fa-play mr-2"
+                                           aria-hidden="true"></i>Play Now
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-xl-5 col-lg-12 col-md-12 trailor-video text-center">
+                                <a href="@mappedMovieDetails.TrailerUrl" class="video-open playbtn">
+                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                         x="0px" y="0px" width="80px" height="80px" viewBox="0 0 213.7 213.7"
+                                         enable-background="new 0 0 213.7 213.7" xml:space="preserve">
+                                    <polygon class='triangle' fill="none" stroke-width="7" stroke-linecap="round"
+                                             stroke-linejoin="round" stroke-miterlimit="10"
+                                             points="73.5,62.5 148.5,105.8 73.5,149.1 " />
+                                    <circle class='circle' fill="none" stroke-width="7" stroke-linecap="round"
+                                            stroke-linejoin="round" stroke-miterlimit="10" cx="106.8" cy="106.8" r="103.3" />
+                              </svg>
+                                    <span class="w-trailor">Watch Trailer</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" style="display: none; width: 1903px;" class="slick-slide slick-cloned" data-slick-index="-1" aria-hidden="true" tabindex="-1">…</svg>
+        }
+
+        @*
+
+
+
+        <!-- Modal -->
+        <div class="modal hidden" style="display: none" id="trailer" tabindex="-1" role="dialog" aria-labelledby="trailerLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">@details.title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="embed-responsive embed-responsive-16by9">
+                            @{
+                                //I am isolating a piece of data in order to use it as my embed source
+                                //var key = details.video.Split("=").Last();
+                                var dbMovie = new Movie();
+                                var movieDetail = await _remoteMovieService.MovieDetailAsync((int)movie.id);
+                                dbMovie = await _tmdbMappingService.MapMovieDetailAsync(movieDetail);
+                                var key = dbMovie.TrailerUrl.Split("=").Last();
+                                var source = $"https://www.youtube.com/embed/{key}";
+                            }
+
+                            <iframe width="560" height="315" src="@source"
+                                    title="YouTube video player" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        *@
+
+
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44px" height="44px" id="circle"
+                    fill="none" stroke="currentColor">
+                <circle r="20" cy="22" cx="22" id="test"></circle>
+            </symbol>
+        </svg>
+    </div>
+</section>
+<!-- Slider End -->
+
+<div class="main-content">
+
+    <section id="iq-upcoming-movie">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12 overflow-hidden">
+                    <div class="iq-main-header d-flex align-items-center justify-content-between">
+                        <h4 class="main-title">Upcoming Movies</h4>
+                        <a class="iq-view-all" href="movie-category.html">View All</a>
+                    </div>
+                    <div class="upcoming-contens">
+                        <ul class="favorites-slider list-inline row p-0 mb-0 iq-rtl-direction">
+                            @foreach (var movie in Model.Upcoming.results.OrderByDescending(m => m.id))
+                            {
+                                <li class="slide-item">
+                                    <div class="block-images position-relative">
+                                        <div class="img-box">
+                                            <img src="@movie.backdrop_path" class="img-fluid" alt="">
+                                        </div>
+                                        <div class="block-description">
+                                            <h5 style="font-size: 1.25rem;" class="iq-title"><a href="movie-details.html">@movie.title</a></h5>
+                                            <div class="movie-time d-flex align-items-center my-2 iq-ltr-direction">
+                                                <div class="badge badge-secondary p-1 mr-2"></div>
+                                                <span class="text-white"></span>
+                                            </div>
+                                            <div class="hover-buttons">
+                                                <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" role="button" class="btn btn-hover iq-button">
+                                                    <i class="fa fa-play mr-1" aria-hidden="true"></i>
+                                                    Play Now
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="block-social-info">
+                                            <ul class="list-inline p-0 m-0 music-play-lists">
+                                                <li class="share">
+                                                    <span><i class="ri-share-fill"></i></span>
+                                                    <div class="share-box">
+                                                        <div class="d-flex align-items-center">
+                                                            <a href="https://www.facebook.com/sharer?u=https://iqonic.design/wp-themes/streamit_wp/movie/shadow/" target="_blank" rel="noopener noreferrer" class="share-ico" tabindex="0"><i class="ri-facebook-fill"></i></a>
+                                                            <a href="https://twitter.com/intent/tweet?text=Currentlyreading" target="_blank" rel="noopener noreferrer" class="share-ico" tabindex="0"><i class="ri-twitter-fill"></i></a>
+                                                            <a href="#" data-link="https://iqonic.design/wp-themes/streamit_wp/movie/shadow/" class="share-ico iq-copy-link" tabindex="0"><i class="ri-links-fill"></i></a>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <span><i class="ri-heart-fill"></i></span>
+                                                    <span class="count-box">19+</span>
+                                                </li>
+                                                <li><span><i class="ri-add-line"></i></span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="iq-topten">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12 overflow-hidden">
+                    <div class="iq-main-header d-flex align-items-center justify-content-between">
+                    </div>
+                    <div class="topten-contens">
+                        <h4 class="main-title iq-title topten-title">Top Rated</h4>
+                        <ul id="top-ten-slider" class="list-inline p-0 m-0  d-flex align-items-center iq-rtl-direction">
+                            @foreach (var movie in Model.TopRated.results.Skip(1))
+                            {
+                                <li class="slick-bg">
+                                    <a href="movie-details.html" style="width: 400px;">
+                                        <img src="@movie.backdrop_path" class="img-fluid w-100" alt="">
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                        <div class="vertical_s">
+                            <ul id="top-ten-slider-nav" class="list-inline p-0 m-0  d-flex align-items-center iq-rtl-direction">
+                                @foreach (var movie in Model.TopRated.results.Skip(1))
+                                {
+                                    <li>
+                                        <div class="block-images position-relative">
+                                            <a href="movie-details.html">
+                                                <img src="@movie.backdrop_path" class="img-fluid w-100" alt="">
+                                            </a>
+                                            <div class="block-description">
+                                                <h5>@movie.title</h5>
+                                                <div class="movie-time d-flex align-items-center my-2 iq-ltr-direction">
+                                                    <div class="badge badge-secondary p-1 mr-2"></div>
+                                                    <span class="text-white"></span>
+                                                </div>
+                                                <div class="hover-buttons">
+                                                    <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" class="btn btn-hover" tabindex="0">
+                                                        <i class="fa fa-play mr-1" aria-hidden="true"></i> Play Now
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="iq-favorites" class="mt-3">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12 overflow-hidden">
+                    <div class="iq-main-header d-flex align-items-center justify-content-between">
+                        <h4 class="main-title">In Theatres</h4>
+                        <a class="iq-view-all" href="movie-category.html">View All</a>
+                    </div>
+                    <div class="favorites-contens">
+                        <ul class="favorites-slider list-inline  row p-0 mb-0 iq-rtl-direction">
+                            @foreach (var movie in Model.NowPlaying.results)
+                            {
+                                <li class="slide-item">
+                                    <div class="block-images position-relative">
+                                        <div class="img-box">
+                                            <img src="@movie.backdrop_path" class="img-fluid" alt="">
+                                        </div>
+                                        <div class="block-description">
+                                            <h5 class="iq-title" style="font-size: 1.25rem;"><a href="movie-details.html">@movie.title</a></h5>
+                                            <div class="movie-time d-flex align-items-center my-2 iq-ltr-direction">
+                                                <div class="badge badge-secondary p-1 mr-2"></div>
+                                                <span class="text-white"></span>
+                                            </div>
+                                            <div class="hover-buttons">
+                                                <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" role="button" class="btn btn-hover iq-button">
+                                                    <i class="fa fa-play mr-1" aria-hidden="true"></i>
+                                                    Play Now
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="block-social-info">
+                                            <ul class="list-inline p-0 m-0 music-play-lists">
+                                                <li class="share">
+                                                    <span><i class="ri-share-fill"></i></span>
+                                                    <div class="share-box">
+                                                        <div class="d-flex align-items-center">
+                                                            <a href="https://www.facebook.com/sharer?u=https://iqonic.design/wp-themes/streamit_wp/movie/shadow/" target="_blank" rel="noopener noreferrer" class="share-ico" tabindex="0"><i class="ri-facebook-fill"></i></a>
+                                                            <a href="https://twitter.com/intent/tweet?text=Currentlyreading" target="_blank" rel="noopener noreferrer" class="share-ico" tabindex="0"><i class="ri-twitter-fill"></i></a>
+                                                            <a href="#" data-link="https://iqonic.design/wp-themes/streamit_wp/movie/shadow/" class="share-ico iq-copy-link" tabindex="0"><i class="ri-links-fill"></i></a>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <span><i class="ri-heart-fill"></i></span>
+                                                    <span class="count-box">19+</span>
+                                                </li>
+                                                <li><span><i class="ri-add-line"></i></span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @{
+        var movies = Model.Upcoming.results;
+        var rand = new Random();
+        var randMovie = movies.ElementAt(rand.Next(movies.Count()));
+
+        var randScore = Math.Truncate(randMovie.vote_average / 2);
+        var index = 1;
+        var classStar = "fa-star";
+        var randMovieDetails = await _remoteMovieService.MovieDetailAsync(randMovie.id);
     }
+    <section id="parallex" class="parallax-window mt-3" style="background-image: url(@randMovie.backdrop_path)">
+        <div class="container-fluid h-100">
+            <div class="row align-items-center justify-content-center h-100 parallaxt-details">
+                <div class="col-lg-4 r-mb-23">
+                    <div class="text-left">
+                        <a href="javascript:void(0);">
+                            <h1 class="slider-text big-title title text-uppercase" data-animation-in="fadeInLeft"
+                                data-delay-in="0.6">
+                                @randMovie.title
+                            </h1>
+                        </a>
 
-    .clamp-title {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
+                        @if (randMovieDetails.runtime != 0)
+                        {
+                            <div class="d-flex flex-wrap align-items-center fadeInLeft animated m-3" data-animation-in="fadeInLeft" style="opacity: 1;">
+                                <div class="slider-ratting d-flex align-items-center mr-4 mt-2 mt-md-3">
+                                    <ul class="ratting-start p-0 m-0 list-inline text-primary d-flex align-items-center justify-content-left">
+                                        <li>
+                                            @{classStar = index <= randScore ? "fa-star" : "fa-star-o"; index++;}
+                                            <i class="fa @classStar" aria-hidden="true"></i>
+                                        </li>
+                                        <li>
+                                            @{classStar = index <= randScore ? "fa-star" : "fa-star-o"; index++;}
+                                            <i class="fa @classStar" aria-hidden="true"></i>
+                                        </li>
+                                        <li>
+                                            @{classStar = index <= randScore ? "fa-star" : "fa-star-o"; index++;}
+                                            <i class="fa @classStar" aria-hidden="true"></i>
+                                        </li>
+                                        <li>
+                                            @{classStar = index <= randScore ? "fa-star" : "fa-star-o"; index++;}
+                                            <i class="fa @classStar" aria-hidden="true"></i>
+                                        </li>
+                                        <li>
+                                            @{classStar = index <= randScore ? "fa-star" : "fa-star-o"; index++;}
+                                            <i class="fa @classStar" aria-hidden="true"></i>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="d-flex align-items-center mt-2 mt-md-3">
+                                    <span class="badge badge-secondary p-2">@(randMovieDetails.runtime)min</span>
+                                </div>
+                            </div>
+                        }
 
-    h5.card-title {
-        height: 3rem;
-    }
-</style>
+                        <p>@randMovie.overview</p>
+                        <div class="parallax-buttons">
+                            <a asp-action="Details" asp-controller="Movies" asp-route-id="@randMovie.id"  class="btn btn-hover">Play Now</a>
+                            <a href="movie-details.html" class="btn btn-link">More details</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="parallax-img">
+                        <a href="movie-details.html">
+                            <img src="@randMovie.poster_path" style="max-width: 25vw; height: 40vw;" class="img-fluid w-100" alt="">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+  
+    <section id="iq-trending" class="s-margin">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12 overflow-hidden">
+                    <div class="iq-main-header d-flex align-items-center justify-content-between">
+                        <h4 class="main-title">Trending</h4>
+                    </div>
+                    <div class="trending-contens">
+                        <ul id="trending-slider-nav" class="list-inline p-0 mb-0 row align-items-center iq-rtl-direction">
 
-<section class="px-4">
-    <div class="row">
-        <span class="btn btn-lg btn-block btn-warning font-weight-bolder border-dark">Upcoming</span>
-    </div>
-    <div class="row">
-        <div class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner" style="height: 37vw">
-                @{
-                    var classText = "active";
-                    for (var slide = 0; slide <= 3; slide++)
-                    {
-                        <div class="carousel-item @classText">
-                            <div class="row">
-                                @foreach (var movie in Model.Upcoming.results.Skip(slide * 4).Take(4))
-                                {
-                                    <div class="col-sm-3 mb-2">
-                                        <div class="card" style="width: 18rem;">
-                                            <img src="@movie.poster_path" class="card-img-top" style="height: 20vw; object-fit:cover; object-position: bottom" alt="..." />
-                                            <div class="card-body">
-                                                <h5 class="clamp-title card-title">@movie.title</h5>
-                                                <p class="clamp-overview card-text">@movie.overview</p>
-                                                <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" class="btn btn-lg btn-block font-weight-bold btn-warning">Details</a>
+
+                            @foreach (var movie in Model.Popular.results.OrderByDescending(m => m.id))
+                            {
+                                <li style="height: 12vw; width: 9vw;">
+                                    <a href="javascript:void(0);">
+                                        <div class="movie-slick position-relative">
+                                            <img src="@movie.backdrop_path" class="img-fluid" alt="">
+                                        </div>
+                                        <div class="block-description">
+                                            <h6 style="font-size: 1.25rem;" class="iq-title">@movie.title</h6>
+                                        </div>
+
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                        <ul id="trending-slider" class="list-inline p-0 m-0  d-flex align-items-center iq-rtl-direction">
+
+
+                            @foreach (var movie in Model.Popular.results.OrderByDescending(m => m.id))
+                            {
+
+                                var score = Math.Truncate(movie.vote_average / 2);
+                                var i = 1;
+                                var starClass = "fa-star";
+                                var details = await _remoteMovieService.MovieDetailAsync(movie.id);
+                                var cast = details.credits.cast;
+                                var genres = details.genres;
+                                var runtime = details.runtime;
+
+                                <li>
+                                    <div class="tranding-block position-relative"
+                                         style="background-image: url(@movie.backdrop_path);">
+                                        <div class="trending-custom-tab">
+                                            <div class="tab-title-info position-relative">
+                                                <ul class="trending-pills d-flex nav nav-pills justify-content-center align-items-center text-center iq-ltr-direction"
+                                                    role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link active show" data-toggle="pill" href="#trending-data17"
+                                                           role="tab" aria-selected="true">Overview</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="trending-content">
+                                                <div id="trending-data17" class="overlay-tab tab-pane fade active show">
+                                                    <div class="trending-info align-items-center w-100 animated fadeInUp iq-ltr-direction">
+                                                        <a href="javascript:void(0);" tabindex="0">
+                                                            <div class="res-logo">
+                                                                <div class="channel-logo">
+                                                                    <img src="@movie.backdrop_path" class="c-logo" alt="streamit">
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                        <h1 class="trending-text big-title text-uppercase">@movie.title</h1>
+                                                        <div class="d-flex mb-3 flex-wrap align-items-center fadeInLeft animated" data-animation-in="fadeInLeft" style="opacity: 1;">
+                                                            <div class="slider-ratting d-flex align-items-center mr-4 mt-2 mt-md-3">
+                                                                <ul class="ratting-start p-0 m-0 list-inline text-primary d-flex align-items-center justify-content-left">
+                                                                    <li>
+                                                                        @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                                        <i class="fa @starClass" aria-hidden="true"></i>
+                                                                    </li>
+                                                                    <li>
+                                                                        @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                                        <i class="fa @starClass" aria-hidden="true"></i>
+                                                                    </li>
+                                                                    <li>
+                                                                        @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                                        <i class="fa @starClass" aria-hidden="true"></i>
+                                                                    </li>
+                                                                    <li>
+                                                                        @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                                        <i class="fa @starClass" aria-hidden="true"></i>
+                                                                    </li>
+                                                                    <li>
+                                                                        @{starClass = i <= score ? "fa-star" : "fa-star-o"; i++;}
+                                                                        <i class="fa @starClass" aria-hidden="true"></i>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="d-flex align-items-center mt-2 mt-md-3">
+                                                                <span class="badge badge-secondary p-2">@(details.runtime)min</span>
+                                                            </div>
+                                                        </div>
+                                                        <p class="trending-dec">@movie.overview</p>
+                                                        <div class="p-btns">
+                                                            <div class="d-flex align-items-center p-0">
+                                                                <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" class="btn btn-hover mr-2" tabindex="0">
+                                                                    <i class="fa fa-play mr-2" aria-hidden="true"></i>Play Now
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="trending-list mt-4">
+                                                            <div class="text-primary title">
+                                                                Starring:
+                                                                <span class="text-body">
+                                                                    @{int num = 1;}
+                                                                    @foreach (var actor in details.credits.cast.Take(2))
+                                                                    {
+                                                                        var comma = num < 2 ? ", " : "";
+                                                                        <span>@actor.name@comma</span>;
+                                                                        num++;
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                            <div class="text-primary title">
+                                                                Genres:
+                                                                <span class="text-body">
+                                                                    @{num = 1;}
+                                                                    @foreach (var g in details.genres)
+                                                                    {
+                                                                        var comma = num < details.genres.Length ? ", " : "";
+                                                                        <span>@g.name@comma</span>;
+                                                                        num++;
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                }
-                            </div>
-                        </div>
-                        classText = "";
-                    }
-                }
+                                </li>
+
+                            }
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
+
+</div>
+
+<div class="rtl-box">
+    <button type="button" id="flip" class="btn btn-light rtl-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 20 20" fill="white">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+        </svg>
+    </button>
+    <div class="rtl-panel" id="panel">
+        <ul class="modes">
+            <li class="dir-btn" data-mode="rtl" data-active="false" data-value="ltr"><a href="#">LTR</a></li>
+            <li class="dir-btn" data-mode="rtl" data-active="true" data-value="rtl"><a href="#">RTL</a></li>
+        </ul>
     </div>
-</section>
+</div>
 
 
-<section class="px-4">
-    <div class="row">
-        <span class="btn btn-lg btn-block btn-warning font-weight-bolder border-dark">Now Playing</span>
-    </div>
-    <div class="row">
-        <div class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner" style="height: 37vw">
-                @{
-                    classText = "active";
-                    for (var slide = 0; slide <= 3; slide++)
-                    {
-                        <div class="carousel-item @classText">
-                            <div class="row">
-                                @foreach (var movie in Model.NowPlaying.results.Skip(slide * 4).Take(4))
-                                {
-                                    <div class="col-sm-3 mb-2">
-                                        <div class="card" style="width: 18rem;">
-                                            <img src="@movie.poster_path" class="card-img-top" style="height: 20vw; object-fit:cover; object-position: bottom" alt="..." />
-                                            <div class="card-body">
-                                                <h5 class="clamp-title card-title">@movie.title</h5>
-                                                <p class="clamp-overview card-text">@movie.overview</p>
-                                                <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" class="btn btn-lg btn-block font-weight-bold btn-warning">Details</a>
+
+
+
+
+
+
+
+@*<section class="px-4">
+        <div class="row">
+            <span class="btn btn-lg btn-block btn-warning font-weight-bolder border-dark">Top Rated</span>
+        </div>
+        <div class="row">
+            <div class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner" style="height: 37vw">
+                    @{
+                        classText = "active";
+                        for (var slide = 0; slide <= 3; slide++)
+                        {
+                            <div class="carousel-item @classText">
+                                <div class="row">
+                                    @foreach (var movie in Model.TopRated.results.Skip(slide * 4).Take(4))
+                                    {
+                                        <div class="col-sm-3 mb-2">
+                                            <div class="card" style="width: 18rem;">
+                                                <img src="@movie.poster_path" class="card-img-top" style="height: 20vw; object-fit:cover; object-position: bottom" alt="..." />
+                                                <div class="card-body">
+                                                    <h5 class="clamp-title card-title">@movie.title</h5>
+                                                    <p class="clamp-overview card-text">@movie.overview</p>
+                                                    <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" class="btn btn-lg btn-block font-weight-bold btn-warning">Details</a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                }
+                                    }
+                                </div>
                             </div>
-                        </div>
-                        classText = "";
+                            classText = "";
+                        }
                     }
-                }
+                </div>
             </div>
         </div>
-    </div>
-</section>
-
-<section class="px-4">
-    <div class="row">
-        <span class="btn btn-lg btn-block btn-warning font-weight-bolder border-dark">Popular</span>
-    </div>
-    <div class="row">
-        <div class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner" style="height: 37vw">
-                @{
-                    classText = "active";
-                    for (var slide = 0; slide <= 3; slide++)
-                    {
-                        <div class="carousel-item @classText">
-                            <div class="row">
-                                @foreach (var movie in Model.Popular.results.Skip(slide * 4).Take(4))
-                                {
-                                    <div class="col-sm-3 mb-2">
-                                        <div class="card" style="width: 18rem;">
-                                            <img src="@movie.poster_path" class="card-img-top" style="height: 20vw; object-fit:cover; object-position: bottom" alt="..." />
-                                            <div class="card-body">
-                                                <h5 class="clamp-title card-title">@movie.title</h5>
-                                                <p class="clamp-overview card-text">@movie.overview</p>
-                                                <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" class="btn btn-lg btn-block font-weight-bold btn-warning">Details</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                        classText = "";
-                    }
-                }
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="px-4">
-    <div class="row">
-        <span class="btn btn-lg btn-block btn-warning font-weight-bolder border-dark">Top Rated</span>
-    </div>
-    <div class="row">
-        <div class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner" style="height: 37vw">
-                @{
-                    classText = "active";
-                    for (var slide = 0; slide <= 3; slide++)
-                    {
-                        <div class="carousel-item @classText">
-                            <div class="row">
-                                @foreach (var movie in Model.TopRated.results.Skip(slide * 4).Take(4))
-                                {
-                                    <div class="col-sm-3 mb-2">
-                                        <div class="card" style="width: 18rem;">
-                                            <img src="@movie.poster_path" class="card-img-top" style="height: 20vw; object-fit:cover; object-position: bottom" alt="..." />
-                                            <div class="card-body">
-                                                <h5 class="clamp-title card-title">@movie.title</h5>
-                                                <p class="clamp-overview card-text">@movie.overview</p>
-                                                <a asp-action="Details" asp-controller="Movies" asp-route-id="@movie.id" class="btn btn-lg btn-block font-weight-bold btn-warning">Details</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                        classText = "";
-                    }
-                }
-            </div>
-        </div>
-    </div>
-</section>
+    </section>*@
 
 

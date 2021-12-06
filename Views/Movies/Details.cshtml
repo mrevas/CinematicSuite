@@ -1,10 +1,173 @@
 ﻿@using CinematicSuite.Services.Interfaces
 @using CinematicSuite.Models.Database
 @inject IImageService _imageService
+@inject IRemoteMovieService _remoteMovieService
 @model Movie
+@{
+    var movie = await _remoteMovieService.MovieDetailAsync(Model.MovieId);
+}
+
+<!-- Banner Start -->
+<section id="banner-wrapper" class="banner-wrapper overlay-wrapper iq-main-slider" style="background-image: url(@_imageService.DecodeImage(Model.Backdrop, Model.BackdropType));">
+    <div class="banner-caption d-flex">
+        <div class="position-relative mb-4">
+            <a href="@ViewData["MovieUrl"]" class="video-open playbtn d-flex align-items-center">
+                <div class="play-button">
+                    <i class="fa fa-play"></i>
+                </div>
+                <h4 class="w-name text-white font-weight-700" style="font-size: 1.5rem;">Watch Now</h4>
+            </a>
+        </div>
+    </div>
+</section>
 
 
-<div class="row">
+<!-- Banner End -->
+<!-- MainContent -->
+<div class="main-content">
+    <section class="movie-detail container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="trending-info g-border">
+                    <h1 class="trending-text big-title text-uppercase mt-0">@Model.Title</h1>
+                    <ul class="p-0 list-inline d-flex align-items-center movie-content">
+                        @foreach (var g in movie.genres)
+                        {
+                            <li class="text-white">@g.name</li>
+                        }
+                    </ul>
+                    <div class="d-flex align-items-center text-white text-detail">
+                        <span class="badge badge-secondary p-3">@Model.Rating</span>
+                        <span class="trending-year">@Model.ReleaseDate.ToString("MMM yyyy")</span>
+                    </div>
+                    <p class="trending-dec w-100 mb-0">@Model.Overview</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="container-fluid seasons">
+        <ul class="trending-pills d-flex nav nav-pills align-items-center text-center s-margin" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active show" data-toggle="pill" href="#episodes" role="tab"
+                   aria-selected="true">Cast</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="pill" href="#popularclips" role="tab" aria-selected="false">
+                    Crew
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div id="episodes" class="tab-pane fade active show" role="tabpanel">
+                <div class="block-space">
+                    <div class="row">
+
+                        @foreach (var cast in movie.credits.cast)
+                        {
+                            var actor = Model.Cast.FirstOrDefault(c => c.CastId == cast.id);
+
+                            if (actor is not null)
+                            {
+                                var actorProfile = actor.ImageUrl ?? "/images/user/user.png";
+
+                                <a class="col-1-5 col-md-6 iq-mb-30" asp-action="Details" asp-controller="Actors" asp-route-id="@actor.CastId">
+                                    <div class="epi-box">
+                                        <div class="epi-img position-relative" style="width: 100%;">
+                                            <img style="object-fit: contain; height: 20vw; width: 100%" src="@actorProfile" class="img-fluid img-zoom" alt="">
+                                        </div>
+                                        <div class="epi-desc p-3">
+                                            <h6 class="epi-name text-white mb-1 text-center">Character: @actor.Character</h6>
+                                            <h6 class="epi-name text-white mb-0 text-center">Name: @actor.Name</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+
+                        }
+                    </div>
+                </div>
+            </div>
+            <div id="popularclips" class="tab-pane fade" role="tabpanel">
+                <div class="block-space">
+                    <div class="row">
+                        @foreach (var cast in movie.credits.crew)
+                        {
+                            var actor = Model.Crew.FirstOrDefault(c => c.CrewId == cast.id);
+
+                            if (actor is not null)
+                            {
+                                var actorProfile = actor.ImageUrl ?? "/images/user/user.png";
+
+                                <a class="col-1-5 col-md-6 iq-mb-30" asp-action="Details" asp-controller="Actors" asp-route-id="@actor.CrewId">
+                                    <div class="epi-box">
+                                        <div class="epi-img position-relative" style="width: 100%;">
+                                            <img style="object-fit: contain; height: 20vw; width: 100%" src="@actorProfile" class="img-fluid img-zoom" alt="">
+                                        </div>
+                                        <div class="epi-desc p-3">
+                                            <h6 class="epi-name text-white mb-0 text-center">Name: @actor.Name</h6>
+                                            <h6 class="epi-name text-white mb-0 text-center">Role: @actor.Job</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="rtl-box">
+    <button type="button" class="btn btn-light rtl-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 20 20" fill="white">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+        </svg>
+    </button>
+    <div class="rtl-panel">
+        <ul class="modes">
+            <li class="dir-btn" data-mode="rtl" data-active="false" data-value="ltr"><a href="#">LTR</a></li>
+            <li class="dir-btn" data-mode="rtl" data-active="true" data-value="rtl"><a href="#">RTL</a></li>
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<div class="row">
     <div class="col-sm-12 col-md-6">
         <div class="row">
             <img src="@_imageService.DecodeImage(Model.Poster, Model.PosterType)" class="w-100" alt="...">
@@ -55,7 +218,7 @@
 
         <div class="row">
             <div class="col">
-                <span class="h5 ml-4">@Model.Overview</span>
+                <span class="h5 ml-4">@ViewData["MovieUrl"]</span>
             </div>
         </div>
     </div>
@@ -86,10 +249,9 @@
             </div>
         </div>
     </div>
-}
-
+}-->
 <!-- Modal -->
-<div class="modal fade" id="trailer" tabindex="-1" role="dialog" aria-labelledby="trailerLabel" aria-hidden="true">
+<!--<div class="modal fade" id="trailer" tabindex="-1" role="dialog" aria-labelledby="trailerLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -118,4 +280,4 @@
             </div>
         </div>
     </div>
-</div>
+</div>-->
