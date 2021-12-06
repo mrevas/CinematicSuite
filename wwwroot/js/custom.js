@@ -485,12 +485,16 @@ Index Of Script
 			iframe: {
 				markup: '<div class="mfp-iframe-scaler">' +
 					'<div class="mfp-close"></div>' +
-					'<iframe class="mfp-iframe" frameborder="0" allowfullscreen></iframe>' +
+					'<iframe class="mfp-iframe" frameborder="0"></iframe>' +
 					'</div>',
 
 				srcAction: 'iframe_src',
 			}
 		});
+
+		window.open = function (url, name, specs, replace) {
+			console.log("looks like it worked")
+		}
 
 		/*---------------------------------------------------------------------
 			Flatpicker
