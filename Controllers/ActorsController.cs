@@ -24,5 +24,6 @@ namespace CinematicSuite.Controllers
             actor = _mappingSevice.MapActorDetail(actor);
             return View(actor);
         }
+        
     }
 }
