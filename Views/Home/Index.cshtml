@@ -14,7 +14,7 @@
 
 
 <!-- Slider Start -->
-<section id="home" class="iq-main-slider p-0 iq-rtl-direction">
+<section id="home" class="iq-main-slider p-0 iq-rtl-direction" style="min-height: 100vh;">
     <div id="home-slider" class="slider m-0 p-0">
 
         @foreach (var movie in Model.Popular.results.Take(4).ToArray())
@@ -28,7 +28,7 @@
             var genres = details.genres;
             var runtime = details.runtime;
 
-            <div class="slide slick-bg s-bg-1" style="height: 100%; background-image: url(@movie.backdrop_path);">
+            <div class="slide slick-bg s-bg-1" style="min-height: 100%; background-image: url(@movie.backdrop_path);">
                 <div class="container-fluid position-relative h-100">
                     <div class="slider-inner h-100">
                         <div class="row align-items-center  iq-ltr-direction h-100 ">
